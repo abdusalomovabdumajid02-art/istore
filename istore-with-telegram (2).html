@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iStore Tashkent — Rasmiy va Xavfsiz Shartnoma Tizimi</title>
+<link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===== RESET & BASE ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #f5f5f7; color: #1d1d1f;
+}
+
+/* ===== NAV ===== */
+nav {
+  position: sticky; top: 0; z-index: 200;
+  background: rgba(255,255,255,0.88);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+  padding: 0 2rem; height: 52px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.logo { font-size: 20px; font-weight: 700; color: #1d1d1f; letter-spacing: -0.5px; }
+.logo span { color: #0071e3; }
+.logo-sub { font-size: 10px; color: #86868b; margin-left: 5px; font-weight: 400; }
+
+/* ===== HERO ===== */
+header {
+  text-align: center; padding: 4rem 1rem 2rem;
+  background: radial-gradient(circle at bottom, #fff 0%, #f5f5f7 100%);
+}
+header h1 { font-size: 40px; font-weight: 700; letter-spacing: -1px; margin-bottom: 0.5rem; }
+header p { color: #86868b; font-size: 19px; max-width: 600px; margin: 0 auto; }
+
+/* ===== TABS ===== */
+.tabs { display: flex; justify-content: center; gap: 0.5rem; margin: 2rem 0; padding: 0 1rem; flex-wrap: wrap; }
+.tab {
+  background: #e8e8ed; border: none; padding: 0.6rem 1.2rem;
+  border-radius: 20px; font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: all 0.2s ease; color: #1d1d1f;
+}
+.tab.active { background: #1d1d1f; color: #fff; }
+
+/* ===== PRODUCTS GRID ===== */
+.container { max-width: 1200px; margin: 0 auto; padding: 0 1rem 4rem; }
+.grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+.product-card {
+  background: #fff; border-radius: 20px; overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  display: flex; flex-direction: column;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  cursor: pointer;
+}
+.product-card:hover { transform: translateY(-6px); box-shadow: 0 16px 32px rgba(0,0,0,0.12); }
+.product-card.hidden { display: none; }
+
+/* Product Image */
+.p-image-wrap {
+  width: 100%; aspect-ratio: 4/3;
+  background: #f5f5f7;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; position: relative;
+}
+.p-image-wrap img {
+  width: 70%; height: 70%; object-fit: contain;
+  transition: transform 0.4s ease;
+}
+.product-card:hover .p-image-wrap img { transform: scale(1.06); }
+
+/* Badges */
+.p-badge-wrap {
+  position: absolute; top: 12px; left: 12px;
+  display: flex; gap: 6px;
+}
+.p-badge {
+  background: rgba(255,255,255,0.9);
+  color: #0071e3; font-size: 10px; font-weight: 700;
+  padding: 4px 8px; border-radius: 6px;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  backdrop-filter: blur(8px);
+}
+.p-badge.new { background: #ff3b30; color: #fff; }
+.p-badge.sale { background: #34c759; color: #fff; }
+
+/* Product Body */
+.p-body { padding: 1.2rem 1.4rem 1.4rem; flex: 1; display: flex; flex-direction: column; }
+.p-title { font-size: 17px; font-weight: 600; margin-bottom: 4px; line-height: 1.3; }
+.p-subtitle { font-size: 13px; color: #86868b; margin-bottom: 10px; }
+
+/* Specs chips */
+.p-specs {
+  display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px;
+}
+.spec-chip {
+  background: #f5f5f7; color: #1d1d1f;
+  font-size: 11px; font-weight: 500; padding: 3px 8px;
+  border-radius: 20px;
+}
+
+.p-desc {
+  font-size: 13px; color: #555; line-height: 1.5;
+  margin-bottom: 14px; flex: 1;
+  display: -webkit-box; -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical; overflow: hidden;
+}
+
+.p-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: auto; }
+.p-price { font-size: 18px; font-weight: 700; color: #1d1d1f; white-space: nowrap; }
+.p-price-sub { font-size: 11px; color: #86868b; font-weight: 400; }
+.p-btn {
+  background: #0071e3; color: #fff; border: none;
+  padding: 0.6rem 1.2rem; border-radius: 10px; font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: background 0.2s ease; white-space: nowrap;
+}
+.p-btn:hover { background: #0077ed; }
+
+/* ===== MODAL ===== */
+.modal-bg {
+  display: none; position: fixed; inset: 0; z-index: 500;
+  background: rgba(0,0,0,0.4); backdrop-filter: blur(8px);
+  align-items: center; justify-content: center; padding: 1rem;
+}
+.modal-bg.open { display: flex; }
+.modal {
+  background: #fff; border-radius: 24px; max-width: 760px; width: 100%;
+  max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 40px 80px rgba(0,0,0,0.2);
+  animation: modalIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes modalIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.modal-inner { display: grid; grid-template-columns: 1fr 1fr; }
+@media (max-width: 600px) { .modal-inner { grid-template-columns: 1fr; } }
+.modal-img-side {
+  background: #f5f5f7; border-radius: 24px 0 0 24px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 2rem; min-height: 280px;
+}
+.modal-img-side img { width: 80%; object-fit: contain; }
+.modal-info { padding: 2rem; }
+.modal-close {
+  position: absolute; top: 1rem; right: 1rem;
+  background: rgba(0,0,0,0.08); border: none;
+  width: 32px; height: 32px; border-radius: 50%;
+  font-size: 16px; cursor: pointer; display: flex;
+  align-items: center; justify-content: center;
+  color: #1d1d1f; transition: background 0.2s;
+}
+.modal-close:hover { background: rgba(0,0,0,0.15); }
+.modal-badge { font-size: 11px; font-weight: 700; color: #0071e3; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.modal-title { font-size: 24px; font-weight: 700; margin-bottom: 6px; line-height: 1.2; }
+.modal-price { font-size: 22px; font-weight: 700; margin-bottom: 16px; }
+.modal-desc { font-size: 14px; color: #555; line-height: 1.6; margin-bottom: 20px; }
+.modal-specs { margin-bottom: 20px; }
+.modal-specs h4 { font-size: 13px; font-weight: 600; color: #86868b; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+.spec-row { display: flex; gap: 8px; margin-bottom: 6px; }
+.spec-key { font-size: 13px; color: #86868b; min-width: 100px; }
+.spec-val { font-size: 13px; font-weight: 500; }
+.modal-actions { display: flex; gap: 10px; }
+.modal-btn { flex: 1; padding: 0.85rem; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
+.modal-btn.primary { background: #0071e3; color: #fff; }
+.modal-btn.primary:hover { background: #0064cc; }
+.modal-btn.secondary { background: #f5f5f7; color: #1d1d1f; }
+.modal-btn.secondary:hover { background: #e8e8ed; }
+
+/* ===== ORDER SECTION ===== */
+.order-section {
+  background: #fff; border-radius: 24px; padding: 2.5rem;
+  margin-top: 3rem; box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+  position: relative;
+}
+.order-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; }
+@media (max-width: 768px) {
+  .order-grid { grid-template-columns: 1fr; gap: 2rem; }
+  header h1 { font-size: 32px; }
+  .modal-img-side { border-radius: 24px 24px 0 0; min-height: 200px; }
+}
+
+.summary-box { background: #f5f5f7; border-radius: 16px; padding: 1.5rem; }
+.summary-item { display: flex; justify-content: space-between; margin-bottom: 0.8rem; font-size: 14px; }
+.summary-total { display: flex; justify-content: space-between; border-top: 1px solid #d2d2d7; padding-top: 1rem; margin-top: 1rem; font-size: 18px; font-weight: 600; }
+
+/* Selected product preview in order */
+.selected-preview {
+  display: flex; align-items: center; gap: 12px;
+  background: #fff; border-radius: 12px; padding: 10px;
+  margin-bottom: 14px; border: 1px solid #e8e8ed;
+}
+.selected-preview img { width: 50px; height: 50px; object-fit: contain; }
+.selected-preview-info { flex: 1; }
+.selected-preview-name { font-size: 13px; font-weight: 600; }
+.selected-preview-price { font-size: 12px; color: #86868b; }
+
+.form-group { margin-bottom: 1.2rem; }
+.form-group label { display: block; font-size: 13px; font-weight: 500; color: #86868b; margin-bottom: 0.4rem; }
+.form-control {
+  width: 100%; padding: 0.8rem; border: 1px solid #d2d2d7;
+  border-radius: 10px; font-size: 15px; background: #fff;
+  transition: border-color 0.2s ease; outline: none;
+}
+.form-control:focus { border-color: #0071e3; }
+
+.pay-options { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-bottom: 1.2rem; }
+.pay-btn {
+  border: 2px solid #e8e8ed; background: #fff; padding: 0.8rem;
+  border-radius: 10px; font-size: 14px; font-weight: 500; cursor: pointer;
+  text-align: center; transition: all 0.2s ease;
+}
+.pay-btn.active { border-color: #0071e3; background: rgba(0,113,227,0.04); color: #0071e3; }
+
+/* ===== TOAST ===== */
+#toast {
+  position: fixed; bottom: -60px; left: 50%; transform: translateX(-50%);
+  background: rgba(29,29,31,0.95); color: #fff; padding: 0.8rem 1.5rem;
+  border-radius: 30px; font-size: 14px; z-index: 1000;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  transition: bottom 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+  pointer-events: none; max-width: 90%; text-align: center;
+}
+#toast.show { bottom: 30px; }
+
+.secure-note {
+  font-size: 12px; color: #6e6e73; margin-top: 1rem; display: flex; align-items: center; gap: 5px;
+}
+
+/* ===== CART ===== */
+.cart-bar {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: #1d1d1f; color: #fff;
+  border-radius: 20px; padding: 14px 24px;
+  display: flex; align-items: center; gap: 16px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+  z-index: 300; min-width: 320px; max-width: 90vw;
+  transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  opacity: 0; pointer-events: none; bottom: -80px;
+}
+.cart-bar.visible { opacity: 1; pointer-events: all; bottom: 24px; }
+.cart-bar-icon { font-size: 20px; }
+.cart-bar-text { flex: 1; }
+.cart-bar-count { font-size: 13px; color: #86868b; }
+.cart-bar-total { font-size: 16px; font-weight: 700; }
+.cart-bar-btn {
+  background: #0071e3; color: #fff; border: none;
+  padding: 10px 18px; border-radius: 12px; font-size: 14px;
+  font-weight: 600; cursor: pointer; white-space: nowrap;
+}
+
+/* Cart panel */
+.cart-panel {
+  position: fixed; right: -420px; top: 52px; bottom: 0;
+  width: 400px; max-width: 100vw;
+  background: #fff; z-index: 400;
+  box-shadow: -8px 0 40px rgba(0,0,0,0.12);
+  transition: right 0.35s cubic-bezier(0.4,0,0.2,1);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.cart-panel.open { right: 0; }
+.cart-panel-head {
+  padding: 1.2rem 1.4rem;
+  border-bottom: 1px solid #f0f0f5;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.cart-panel-head h3 { font-size: 18px; font-weight: 700; }
+.cart-close {
+  background: #f5f5f7; border: none; width: 32px; height: 32px;
+  border-radius: 50%; cursor: pointer; font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+}
+.cart-items { flex: 1; overflow-y: auto; padding: 1rem; }
+.cart-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 0; border-bottom: 1px solid #f5f5f7;
+}
+.cart-item img { width: 56px; height: 56px; object-fit: contain; background: #f5f5f7; border-radius: 10px; padding: 4px; }
+.cart-item-info { flex: 1; }
+.cart-item-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.cart-item-price { font-size: 12px; color: #86868b; }
+.cart-item-controls { display: flex; align-items: center; gap: 6px; }
+.qty-btn {
+  width: 26px; height: 26px; border-radius: 50%; border: none;
+  background: #f5f5f7; font-size: 14px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; color: #1d1d1f;
+}
+.qty-val { font-size: 13px; font-weight: 600; min-width: 20px; text-align: center; }
+.cart-remove { background: none; border: none; color: #ff3b30; cursor: pointer; font-size: 18px; padding: 0 4px; }
+.cart-footer {
+  padding: 1.2rem 1.4rem;
+  border-top: 1px solid #f0f0f5;
+  background: #fff;
+}
+.cart-footer-total {
+  display: flex; justify-content: space-between;
+  font-size: 17px; font-weight: 700; margin-bottom: 12px;
+}
+.cart-checkout-btn {
+  width: 100%; background: #0071e3; color: #fff;
+  border: none; padding: 14px; border-radius: 14px;
+  font-size: 15px; font-weight: 600; cursor: pointer;
+}
+.cart-checkout-btn:hover { background: #0064cc; }
+.cart-empty {
+  text-align: center; padding: 3rem 1rem; color: #86868b;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+.cart-empty-icon { font-size: 40px; }
+
+/* Overlay */
+.cart-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.3);
+  z-index: 399; opacity: 0; pointer-events: none;
+  transition: opacity 0.3s;
+}
+.cart-overlay.open { opacity: 1; pointer-events: all; }
+
+/* Nav cart badge */
+.nav-cart {
+  background: #f5f5f7; border: none; padding: 6px 14px;
+  border-radius: 20px; font-size: 13px; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center; gap: 6px;
+}
+.nav-cart-badge {
+  background: #ff3b30; color: #fff; font-size: 11px;
+  font-weight: 700; border-radius: 10px; padding: 1px 6px;
+  display: none;
+}
+
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">iStore<span>.uz</span><span class="logo-sub">Xavfsiz To'lov Tizimi</span></div>
+  <button class="nav-cart" onclick="toggleCart()">
+    🛒 Savatcha <span class="nav-cart-badge" id="nav-badge">0</span>
+  </button>
+</nav>
+
+<!-- Cart overlay -->
+<div class="cart-overlay" id="cart-overlay" onclick="toggleCart()"></div>
+
+<!-- Cart panel -->
+<div class="cart-panel" id="cart-panel">
+  <div class="cart-panel-head">
+    <h3>🛒 Savatcha</h3>
+    <button class="cart-close" onclick="toggleCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cart-items"></div>
+  <div class="cart-footer" id="cart-footer" style="display:none;">
+    <div class="cart-footer-total">
+      <span>Jami:</span>
+      <span id="cart-total-price">0 UZS</span>
+    </div>
+    <button class="cart-checkout-btn" onclick="goCheckout()">✅ Buyurtma berish</button>
+  </div>
+</div>
+
+<!-- Floating cart bar -->
+<div class="cart-bar" id="cart-bar">
+  <div class="cart-bar-icon">🛒</div>
+  <div class="cart-bar-text">
+    <div class="cart-bar-count" id="bar-count">0 mahsulot</div>
+    <div class="cart-bar-total" id="bar-total">0 UZS</div>
+  </div>
+  <button class="cart-bar-btn" onclick="toggleCart()">Savatchani ko'rish</button>
+</div>
+
+<header>
+  <h1>Siz istagan mukammallik.</h1>
+  <p>Mahsulotni tanlang, xavfsiz shartnoma yoki muddatli to'lovni rasmiylashtiring.</p>
+</header>
+
+<div class="tabs">
+  <button class="tab active" onclick="filterTab(this, 'all')">Barchasi</button>
+  <button class="tab" onclick="filterTab(this, 'iphone')">iPhone</button>
+  <button class="tab" onclick="filterTab(this, 'ipad')">iPad</button>
+  <button class="tab" onclick="filterTab(this, 'mac')">Mac</button>
+  <button class="tab" onclick="filterTab(this, 'watch')">Apple Watch</button>
+  <button class="tab" onclick="filterTab(this, 'acc')">Aksessuarlar</button>
+</div>
+
+<div class="container">
+  <div id="products-grid" class="grid"></div>
+
+  <div class="order-section" id="order-section">
+    <div class="order-grid">
+      
+      <div>
+        <h2 style="font-size: 24px; margin-bottom: 1.5rem; font-weight: 600;">Sizning buyurtmangiz</h2>
+        <div class="summary-box">
+
+          <!-- Selected product preview -->
+          <div id="selected-preview" class="selected-preview" style="display:none;">
+            <img id="preview-img" src="" alt="">
+            <div class="selected-preview-info">
+              <div class="selected-preview-name" id="preview-name">—</div>
+              <div class="selected-preview-price" id="preview-price">—</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="product-select">Tanlangan mahsulot</label>
+            <select id="product-select" class="form-control" onchange="updateCalculations()"></select>
+          </div>
+          
+          <div class="form-group">
+            <label for="qty">Miqdor (Dona)</label>
+            <input type="number" id="qty" class="form-control" value="1" min="1" max="10" oninput="updateCalculations()">
+          </div>
+
+          <div style="margin: 1.5rem 0; border-top: 1px solid #d2d2d7;"></div>
+
+          <div class="summary-item">
+            <span>Asosiy narxi:</span>
+            <span id="sum-base">0 UZS</span>
+          </div>
+          <div class="summary-item" id="row-schema" style="display:none;">
+            <span>To'lov sxemasi:</span>
+            <span id="sum-schema" style="color:#0071e3; font-weight:500;">Naqd</span>
+          </div>
+          <div class="summary-item" id="row-monthly" style="display:none;">
+            <span>Oylik to'lov (6 oy):</span>
+            <span id="sum-monthly" style="font-weight:600; color:#ff453a;">0 UZS</span>
+          </div>
+          <div class="summary-total">
+            <span>Jami to'lov:</span>
+            <span id="sum-total">0 UZS</span>
+          </div>
+        </div>
+        
+        <p class="secure-note">
+          🔒 Shaxsiy ma'lumotlar va karta ma'lumotlari xavfsizligi davlat standartlari hamda shifrlangan xavfsiz backend protokollari (HTTPS API) orqali kafolatlanadi.
+        </p>
+      </div>
+
+      <div>
+        <h2 style="font-size: 24px; margin-bottom: 1.5rem; font-weight: 600;">Rasmiylashtirish</h2>
+        
+        <div class="form-group">
+          <label>To'lov usuli</label>
+          <div class="pay-options">
+            <div id="btn-pay-naqd" class="pay-btn active" onclick="selectPay('naqd')">Naqd / To'liq To'lov</div>
+            <div id="btn-pay-kredit" class="pay-btn" onclick="selectPay('kredit')">Muddatli to'lov (6 oy / +15%)</div>
+          </div>
+        </div>
+
+        <form id="order-form" onsubmit="handleOrderSubmit(event)">
+          <div class="form-group">
+            <label for="f-name">F.I.Sh. (To'liq kiriting)</label>
+            <input type="text" id="f-name" class="form-control" placeholder="Masalan: Abdullayev Anvar" required>
+          </div>
+
+          <div class="form-group">
+            <label for="f-phone">Telefon raqamingiz</label>
+            <input type="tel" id="f-phone" class="form-control" placeholder="+998 (90) 123-45-67" required>
+          </div>
+
+          <div id="kredit-fields" style="display: none; border-left: 3px solid #0071e3; padding-left: 1rem; margin-top: 1rem;">
+            <div class="form-group">
+              <label for="f-birth">Tug'ilgan sanangiz (Kredit uchun 18 yoshdan katta bo'lish talab etiladi)</label>
+              <input type="date" id="f-birth" class="form-control">
+            </div>
+            <p style="font-size: 12px; color:#6e6e73; background:#e8e8ed; padding: 8px; border-radius:6px;">
+              ℹ️ Skoring tekshiruvidan o'tish uchun buyurtma bergandan so'ng backend xizmati sizni rasmiy davlat billing platformasiga (OneID) xavfsiz yo'naltiradi. Fronted-da nozik pasport ma'lumotlari talab etilmaydi.
+            </p>
+          </div>
+
+          <button type="submit" id="submit-btn" class="p-btn" style="margin-top: 1rem; font-size: 16px; padding: 1rem; width: 100%;">✅ Buyurtma berish</button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modal-bg" onclick="closeModal(event)">
+  <div class="modal" style="position:relative;">
+    <button class="modal-close" onclick="document.getElementById('modal-bg').classList.remove('open')">✕</button>
+    <div class="modal-inner">
+      <div class="modal-img-side">
+        <img id="modal-img" src="" alt="">
+      </div>
+      <div class="modal-info">
+        <div class="modal-badge" id="modal-cat"></div>
+        <div class="modal-title" id="modal-title"></div>
+        <div class="modal-price" id="modal-price"></div>
+        <div class="modal-desc" id="modal-desc"></div>
+        <div class="modal-specs">
+          <h4>Texnik xususiyatlar</h4>
+          <div id="modal-specs-list"></div>
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn primary" id="modal-buy-btn">Sotib olish</button>
+          <button class="modal-btn secondary" onclick="document.getElementById('modal-bg').classList.remove('open')">Yopish</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const products = [
+  {
+    id: "p1", name: "iPhone 16 Pro Max", subtitle: "256GB • Titan Black", price: 18900000, cat: "iphone",
+    badge: "new",
+    img: "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-16-pro-finish-select-202409-6-9inch-blacktitanium?wid=5120&hei=2880&fmt=p-jpg&qlt=80&.v=1725388540913",
+    desc: "iPhone 16 Pro Max — eng kuchli iPhone. A18 Pro chip, titanium korpus, 48MP kamera tizimi va 5x optik zoom. Butun kun davomida ishlaydigan batareya.",
+    specs: [
+      ["Ekran", "6.9\" Super Retina XDR OLED"],
+      ["Chip", "Apple A18 Pro"],
+      ["Asosiy kamera", "48MP Fusion + 48MP Ultra Wide + 12MP 5x Telephoto"],
+      ["Batareya", "29 soatgacha video"],
+      ["Xotira", "256GB"],
+      ["OS", "iOS 18"],
+    ]
+  },
+  {
+    id: "p2", name: "iPhone 16", subtitle: "128GB • Ultramarine", price: 13500000, cat: "iphone",
+    badge: "new",
+    img: "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-16-finish-select-202409-6-1inch-ultramarine?wid=5120&hei=2880&fmt=p-jpg&qlt=80&.v=1723754584085",
+    desc: "iPhone 16 — AI uchun yaratilgan. Apple Intelligence bilan yangi darajadagi kamera boshqaruvi, jonli fotolar va kuchli ishlash.",
+    specs: [
+      ["Ekran", "6.1\" Super Retina XDR"],
+      ["Chip", "Apple A18"],
+      ["Kamera", "48MP Fusion + 12MP Ultra Wide"],
+      ["Batareya", "22 soatgacha video"],
+      ["Xotira", "128GB"],
+      ["OS", "iOS 18"],
+    ]
+  },
+  {
+    id: "p3", name: "iPhone 15 Pro", subtitle: "256GB • Natural Titanium", price: 15400000, cat: "iphone",
+    badge: null,
+    img: "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-15-pro-finish-select-202309-6-1inch-naturaltitanium?wid=5120&hei=2880&fmt=p-jpg&qlt=80&.v=1693009285888",
+    desc: "iPhone 15 Pro — professional darajadagi titanium smartfon. A17 Pro chip va 48MP kamera tizimi, USB 3 tezligi.",
+    specs: [
+      ["Ekran", "6.1\" Super Retina XDR ProMotion"],
+      ["Chip", "Apple A17 Pro"],
+      ["Kamera", "48MP + 12MP UW + 12MP 3x Telephoto"],
+      ["Batareya", "23 soatgacha video"],
+      ["Xotira", "256GB"],
+      ["Port", "USB-C (USB 3)"],
+    ]
+  },
+  {
+    id: "p4", name: "iPad Pro M4", subtitle: "11\" • 256GB • Space Black", price: 22800000, cat: "ipad",
+    badge: "new",
+    img: "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/ipad-pro-finish-select-202405-11inch-spaceblack-wifi?wid=5120&hei=2880&fmt=p-jpg&qlt=80&.v=1714911330208",
+    desc: "iPad Pro M4 — eng ingichka Apple mahsuloti. Ultra Retina XDR OLED ekran, M4 chip va Apple Pencil Pro qo'llab-quvvatlash.",
+    specs: [
+      ["Ekran", "11\" Ultra Retina XDR OLED"],
+      ["Chip", "Apple M4"],
+      ["Kamera", "12MP Wide + 10MP Ultra Wide"],
+      ["Batareya", "10 soatgacha"],
+      ["Xotira", "256GB"],
+      ["Qalinligi", "5.3 mm"],
+    ]
+  },
+  {
+    id: "p5", name: "MacBook Air M3", subtitle: "13\" • 8GB RAM • 256GB", price: 32500000, cat: "mac",
+    badge: null,
+    img: "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/macbook-air-midnight-select-20220606?wid=904&hei=840&fmt=jpeg&qlt=90&.v=1653084303665",
+    desc: "MacBook Air M3 — eng ko'p sotiladigan noutbuk. M3 chip bilan inanilmas tezlik, 18 soat batareya va og'irsiz dizayn.",
+    specs: [
+      ["Ekran", "13.6\" Liquid Retina"],
+      ["Chip", "Apple M3 (8-core CPU, 10-core GPU)"],
+      ["RAM", "8GB unified memory"],
+      ["Xotira", "256GB SSD"],
+      ["Batareya", "18 soatgacha"],
+      ["Vazn", "1.24 kg"],
+    ]
+  },
+  {
+    id: "p6", name: "Apple Watch Series 10", subtitle: "GPS • 46mm • Jet Black", price: 6800000, cat: "watch",
+    badge: "new",
+    img: "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/watch-case-46-aluminum-jetblack-nc-s10_VW_PF+watch-face-46-aluminum-jetblack-s10_VW_PF?wid=1400&hei=1400&fmt=p-jpg&qlt=95&.v=1724955672672",
+    desc: "Apple Watch Series 10 — eng yupqa va engil Apple Watch. Kattaroq ekran, tezroq zaryadlash va Depth gauge.",
+    specs: [
+      ["Ekran", "46mm Retina LTPO OLED"],
+      ["Sensor", "Electrical Heart Sensor, Blood Oxygen"],
+      ["Batareya", "18 soatgacha"],
+      ["Suv bardoshligi", "50 metr"],
+      ["Qalinligi", "9.7 mm (eng yupqa)"],
+      ["Chip", "S10"],
+    ]
+  },
+  {
+    id: "p7", name: "AirPods Pro (2nd Gen)", subtitle: "USB-C • MagSafe Case", price: 3500000, cat: "acc",
+    badge: null,
+    img: "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/MQD83?wid=1144&hei=1144&fmt=jpeg&qlt=90&.v=1660803972361",
+    desc: "AirPods Pro 2 — sanoatdagi eng yaxshi faol shovqin o'chirish. Adaptive Audio, Personalized Spatial Audio va 30 soatgacha batareya.",
+    specs: [
+      ["Chip", "H2"],
+      ["Shovqin o'chirish", "Adaptive Transparency + ANC"],
+      ["Batareya", "6 soat (30 soat keysda)"],
+      ["Suv bardoshligi", "IPX4"],
+      ["Port", "USB-C"],
+      ["Spatial Audio", "Head Tracking bilan"],
+    ]
+  },
+  {
+    id: "p8", name: "Apple Watch Ultra 2", subtitle: "GPS + Cellular • Titanium", price: 12900000, cat: "watch",
+    badge: null,
+    img: "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/watch-case-49-titanium-natural-nc-ultra2_VW_PF+watch-face-49-titanium-natural-ultra2_VW_PF?wid=1400&hei=1400&fmt=p-jpg&qlt=95&.v=1694014350361",
+    desc: "Apple Watch Ultra 2 — eng kuchli va bardoshli Apple Watch. Alpinistlar, suv osti g'avvoslari va ultra-davomiylikdagi sportchilar uchun.",
+    specs: [
+      ["Ekran", "49mm Always-On Retina LTPO2"],
+      ["Batareya", "60 soatgacha"],
+      ["Suv bardoshligi", "100 metr (EN 13319)"],
+      ["GPS", "Dual-frequency precision GPS"],
+      ["Korpus", "Titanium"],
+      ["Ovoz", "86dB sirena"],
+    ]
+  },
+  {
+    id: "p9", name: "20W USB-C Adapter", subtitle: "Original Apple", price: 350000, cat: "acc",
+    badge: "sale",
+    img: "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/MHJA3?wid=1144&hei=1144&fmt=jpeg&qlt=90&.v=1603481646000",
+    desc: "Apple 20W USB-C Power Adapter — iPhone va iPad uchun tez zaryadlash. Compact dizayn va yuksak samaradorlik.",
+    specs: [
+      ["Quvvat", "20W"],
+      ["Port", "USB-C"],
+      ["Muvofiqlik", "iPhone 8 va undan yuqori"],
+      ["Tez zaryadlash", "50% → 30 daqiqada (iPhone 15)"],
+      ["Standart", "USB Power Delivery 2.0"],
+      ["Kafolat", "1 yil"],
+    ]
+  }
+];
+
+let selectedPaymentMethod = 'naqd';
+
+function catLabel(cat) {
+  const map = { iphone: 'iPhone', ipad: 'iPad', mac: 'Mac', watch: 'Apple Watch', acc: 'Aksessuarlar' };
+  return map[cat] || cat;
+}
+
+function init() {
+  const grid = document.getElementById('products-grid');
+  const select = document.getElementById('product-select');
+  grid.innerHTML = '';
+  select.innerHTML = '';
+
+  products.forEach(p => {
+    // Card
+    const card = document.createElement('div');
+    card.className = 'product-card';
+    card.dataset.cat = p.cat;
+    
+    const badgeHtml = p.badge
+      ? `<span class="p-badge ${p.badge}">${p.badge === 'new' ? '✨ Yangi' : p.badge === 'sale' ? '💚 Chegirma' : p.badge}</span>`
+      : '';
+
+    card.innerHTML = `
+      <div class="p-image-wrap">
+        <img src="${p.img}" alt="${p.name}" loading="lazy" onerror="this.src='https://placehold.co/300x240/f5f5f7/86868b?text=Apple'">
+        <div class="p-badge-wrap">
+          <span class="p-badge">${catLabel(p.cat)}</span>
+          ${p.badge === 'new' ? '<span class="p-badge new">Yangi</span>' : ''}
+          ${p.badge === 'sale' ? '<span class="p-badge sale">Chegirma</span>' : ''}
+        </div>
+      </div>
+      <div class="p-body">
+        <div>
+          <div class="p-title">${p.name}</div>
+          <div class="p-subtitle">${p.subtitle}</div>
+          <div class="p-specs">
+            ${p.specs.slice(0, 3).map(s => `<span class="spec-chip">${s[1]}</span>`).join('')}
+          </div>
+          <div class="p-desc">${p.desc}</div>
+        </div>
+        <div class="p-footer">
+          <div>
+            <div class="p-price">${(p.price/1000000).toFixed(1)} mln UZS</div>
+            <div class="p-price-sub">${p.price.toLocaleString('uz-UZ')} UZS</div>
+          </div>
+          <div style="display:flex;gap:6px;">
+            <button class="p-btn" style="background:#f5f5f7;color:#0071e3;" onclick="openModal('${p.id}')">Ko'proq</button>
+            <button class="p-btn" id="add-btn-${p.id}" onclick="addToCart('${p.id}')">🛒 Qo'shish</button>
+          </div>
+        </div>
+      </div>
+    `;
+    grid.appendChild(card);
+
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    opt.textContent = `${p.name} — ${p.price.toLocaleString('uz-UZ')} UZS`;
+    select.appendChild(opt);
+  });
+
+  updateCalculations();
+}
+
+function openModal(id) {
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('modal-img').src = p.img;
+  document.getElementById('modal-cat').textContent = catLabel(p.cat);
+  document.getElementById('modal-title').textContent = `${p.name} — ${p.subtitle}`;
+  document.getElementById('modal-price').textContent = `${p.price.toLocaleString('uz-UZ')} UZS`;
+  document.getElementById('modal-desc').textContent = p.desc;
+  const specsList = document.getElementById('modal-specs-list');
+  specsList.innerHTML = p.specs.map(s => `
+    <div class="spec-row">
+      <span class="spec-key">${s[0]}</span>
+      <span class="spec-val">${s[1]}</span>
+    </div>
+  `).join('');
+  document.getElementById('modal-buy-btn').onclick = () => {
+    document.getElementById('modal-bg').classList.remove('open');
+    addToCart(id);
+  };
+  document.getElementById('modal-bg').classList.add('open');
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modal-bg')) {
+    document.getElementById('modal-bg').classList.remove('open');
+  }
+}
+
+/* ===== CART ===== */
+let cart = []; // [{id, qty}]
+
+function addToCart(id) {
+  const existing = cart.find(c => c.id === id);
+  if (existing) {
+    existing.qty = Math.min(existing.qty + 1, 10);
+    showToast('✅ Savatcha yangilandi!');
+  } else {
+    cart.push({ id, qty: 1 });
+    showToast('🛒 Savatchaga qo\'shildi!');
+  }
+  // Animate button
+  const btn = document.getElementById('add-btn-' + id);
+  if (btn) {
+    btn.textContent = '✓ Qo\'shildi';
+    btn.style.background = '#34c759';
+    setTimeout(() => {
+      btn.textContent = '🛒 Qo\'shish';
+      btn.style.background = '';
+    }, 1500);
+  }
+  renderCart();
+  updateCartBar();
+}
+
+function removeFromCart(id) {
+  cart = cart.filter(c => c.id !== id);
+  renderCart();
+  updateCartBar();
+}
+
+function changeQty(id, delta) {
+  const item = cart.find(c => c.id === id);
+  if (!item) return;
+  item.qty += delta;
+  if (item.qty <= 0) cart = cart.filter(c => c.id !== id);
+  renderCart();
+  updateCartBar();
+}
+
+function cartTotal() {
+  return cart.reduce((sum, c) => {
+    const p = products.find(x => x.id === c.id);
+    return sum + (p ? p.price * c.qty : 0);
+  }, 0);
+}
+
+function renderCart() {
+  const el = document.getElementById('cart-items');
+  const footer = document.getElementById('cart-footer');
+  const badge = document.getElementById('nav-badge');
+  const totalCount = cart.reduce((s, c) => s + c.qty, 0);
+
+  badge.textContent = totalCount;
+  badge.style.display = totalCount > 0 ? 'inline' : 'none';
+
+  if (cart.length === 0) {
+    el.innerHTML = `<div class="cart-empty"><div class="cart-empty-icon">🛒</div><div>Savatcha bo'sh</div><div style="font-size:13px;">Mahsulotlarni qo'shing</div></div>`;
+    footer.style.display = 'none';
+    return;
+  }
+
+  footer.style.display = 'block';
+  document.getElementById('cart-total-price').textContent = cartTotal().toLocaleString('uz-UZ') + ' UZS';
+
+  el.innerHTML = cart.map(c => {
+    const p = products.find(x => x.id === c.id);
+    if (!p) return '';
+    return `
+      <div class="cart-item">
+        <img src="${p.img}" alt="${p.name}" onerror="this.src='https://placehold.co/56x56/f5f5f7/86868b?text=+'">
+        <div class="cart-item-info">
+          <div class="cart-item-name">${p.name}</div>
+          <div class="cart-item-price">${(p.price * c.qty).toLocaleString('uz-UZ')} UZS</div>
+        </div>
+        <div class="cart-item-controls">
+          <button class="qty-btn" onclick="changeQty('${p.id}', -1)">−</button>
+          <span class="qty-val">${c.qty}</span>
+          <button class="qty-btn" onclick="changeQty('${p.id}', 1)">+</button>
+          <button class="cart-remove" onclick="removeFromCart('${p.id}')">🗑</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function updateCartBar() {
+  const bar = document.getElementById('cart-bar');
+  const count = cart.reduce((s, c) => s + c.qty, 0);
+  if (count === 0) { bar.classList.remove('visible'); return; }
+  bar.classList.add('visible');
+  document.getElementById('bar-count').textContent = count + ' ta mahsulot';
+  document.getElementById('bar-total').textContent = cartTotal().toLocaleString('uz-UZ') + ' UZS';
+}
+
+function toggleCart() {
+  document.getElementById('cart-panel').classList.toggle('open');
+  document.getElementById('cart-overlay').classList.toggle('open');
+}
+
+function goCheckout() {
+  if (cart.length === 0) { showToast('❌ Savatcha bo\'sh!'); return; }
+  toggleCart();
+  // Fill order section with cart summary
+  populateOrderFromCart();
+  document.getElementById('order-section').scrollIntoView({ behavior: 'smooth' });
+}
+
+function populateOrderFromCart() {
+  // Update select to first cart item (form handles one product at a time)
+  if (cart.length > 0) {
+    document.getElementById('product-select').value = cart[0].id;
+    document.getElementById('qty').value = cart[0].qty;
+    updateCalculations();
+  }
+}
+
+function selectProduct(id) {
+  document.getElementById('product-select').value = id;
+  updateCalculations();
+  document.getElementById('order-section').scrollIntoView({ behavior: 'smooth' });
+}
+
+function selectPay(method) {
+  selectedPaymentMethod = method;
+  document.getElementById('btn-pay-naqd').classList.toggle('active', method === 'naqd');
+  document.getElementById('btn-pay-kredit').classList.toggle('active', method === 'kredit');
+  document.getElementById('kredit-fields').style.display = method === 'kredit' ? 'block' : 'none';
+  updateCalculations();
+}
+
+function updateCalculations() {
+  // If cart has items, show cart total; otherwise show selected product
+  if (cart.length > 0) {
+    const total = cartTotal();
+    // Show cart items summary in preview
+    const preview = document.getElementById('selected-preview');
+    preview.style.display = 'flex';
+    const firstItem = cart[0];
+    const firstProduct = products.find(p => p.id === firstItem.id);
+    if (firstProduct) {
+      document.getElementById('preview-img').src = firstProduct.img;
+      document.getElementById('preview-name').textContent = cart.length > 1 ? `${firstProduct.name} va yana ${cart.length - 1} ta mahsulot` : firstProduct.name;
+      document.getElementById('preview-price').textContent = `Jami: ${total.toLocaleString('uz-UZ')} UZS`;
+    }
+    document.getElementById('sum-base').textContent = total.toLocaleString('uz-UZ') + ' UZS';
+    if (selectedPaymentMethod === 'kredit') {
+      const creditTotal = total * 1.15;
+      document.getElementById('row-schema').style.display = 'flex';
+      document.getElementById('sum-schema').textContent = "Muddatli to'lov (6 oy)";
+      document.getElementById('row-monthly').style.display = 'flex';
+      document.getElementById('sum-monthly').textContent = Math.round(creditTotal / 6).toLocaleString('uz-UZ') + ' UZS';
+      document.getElementById('sum-total').textContent = Math.round(creditTotal).toLocaleString('uz-UZ') + ' UZS';
+    } else {
+      document.getElementById('row-schema').style.display = 'none';
+      document.getElementById('row-monthly').style.display = 'none';
+      document.getElementById('sum-total').textContent = total.toLocaleString('uz-UZ') + ' UZS';
+    }
+    return;
+  }
+
+  const pId = document.getElementById('product-select').value;
+  const product = products.find(p => p.id === pId);
+  let qtyInput = document.getElementById('qty');
+  let qty = parseInt(qtyInput.value);
+  if (isNaN(qty) || qty < 1) qty = 1;
+  else if (qty > 10) {
+    qty = 10;
+    qtyInput.value = 10;
+    showToast('⚠️ Maksimal buyurtma miqdori 10 dona!');
+  }
+  if (!product) return;
+
+  const preview = document.getElementById('selected-preview');
+  preview.style.display = 'flex';
+  document.getElementById('preview-img').src = product.img;
+  document.getElementById('preview-name').textContent = product.name;
+  document.getElementById('preview-price').textContent = product.price.toLocaleString('uz-UZ') + ' UZS';
+
+  const baseTotal = product.price * qty;
+  document.getElementById('sum-base').textContent = baseTotal.toLocaleString('uz-UZ') + " UZS";
+
+  if (selectedPaymentMethod === 'kredit') {
+    const creditTotal = baseTotal * 1.15;
+    const monthly = creditTotal / 6;
+    document.getElementById('row-schema').style.display = 'flex';
+    document.getElementById('sum-schema').textContent = "Muddatli to'lov (6 oy)";
+    document.getElementById('row-monthly').style.display = 'flex';
+    document.getElementById('sum-monthly').textContent = Math.round(monthly).toLocaleString('uz-UZ') + " UZS";
+    document.getElementById('sum-total').textContent = Math.round(creditTotal).toLocaleString('uz-UZ') + " UZS";
+  } else {
+    document.getElementById('row-schema').style.display = 'none';
+    document.getElementById('row-monthly').style.display = 'none';
+    document.getElementById('sum-total').textContent = baseTotal.toLocaleString('uz-UZ') + " UZS";
+  }
+}
+
+async function handleOrderSubmit(event) {
+  event.preventDefault();
+  const pId = document.getElementById('product-select').value;
+  const product = products.find(p => p.id === pId);
+  const qty = parseInt(document.getElementById('qty').value);
+  const fullName = document.getElementById('f-name').value.trim();
+  const phone = document.getElementById('f-phone').value.trim();
+
+  if (selectedPaymentMethod === 'kredit') {
+    const birthDateInput = document.getElementById('f-birth').value;
+    if (!birthDateInput) { showToast("❌ Iltimos, tug'ilgan sanangizni kiriting."); return; }
+    const birthDate = new Date(birthDateInput);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) age--;
+    if (age < 18) { showToast("❌ Muddatli to'lov faqat 18 yoshdan oshgan fuqarolarga beriladi!"); return; }
+  }
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Yuborilmoqda...';
+
+  const orderPayload = {
+    productId: product.id,
+    productName: product.name,
+    quantity: qty,
+    paymentMethod: selectedPaymentMethod,
+    customerName: fullName,
+    customerPhone: phone,
+    timestamp: new Date().toISOString()
+  };
+
+  const TOKEN = '8664546966:AAHhFlxpoMFLKu0mGEmcl-BD29jGQDR0cyw';
+  const API  = 'https://api.telegram.org/bot' + TOKEN;
+
+  // ── 1. Chat ID ni getUpdates orqali avtomatik topish ──
+  async function resolveChatId() {
+    if (window.__tgChatId) return window.__tgChatId;
+    const r   = await fetch(API + '/getUpdates?limit=20&timeout=0');
+    const d   = await r.json();
+    if (!d.ok || !d.result.length) return null;
+    for (const u of [...d.result].reverse()) {
+      const chat = (u.message || u.channel_post || {}).chat;
+      if (chat && chat.id) { window.__tgChatId = chat.id; return chat.id; }
+    }
+    return null;
+  }
+
+  // ── 2. Xabar matni ──
+  const totalSum = cart.length > 0 ? cartTotal() : product.price * qty;
+
+  let lines = [];
+  if (cart.length > 0) {
+    cart.forEach(c => {
+      const p = products.find(x => x.id === c.id);
+      lines.push('  • ' + (p ? p.name : c.id) + ' x' + c.qty + ' = ' + (p ? p.price * c.qty : 0).toLocaleString('uz-UZ') + ' UZS');
+    });
+  } else {
+    lines.push('  • ' + product.name + ' x' + qty + ' = ' + (product.price * qty).toLocaleString('uz-UZ') + ' UZS');
+  }
+
+  const payLabel = selectedPaymentMethod === 'kredit'
+    ? "Muddatli (6 oy +15%) = " + Math.round(totalSum * 1.15).toLocaleString('uz-UZ') + " UZS"
+    : "Naqd = " + totalSum.toLocaleString('uz-UZ') + " UZS";
+
+  const birthVal  = document.getElementById('f-birth').value;
+  const birthLine = birthVal ? "\nTug'ilgan sana: " + birthVal : '';
+  const now       = new Date();
+  const pad       = n => String(n).padStart(2,'0');
+  const dateStr   = pad(now.getDate())+'.'+pad(now.getMonth()+1)+'.'+now.getFullYear()+' '+pad(now.getHours())+':'+pad(now.getMinutes());
+
+  const msgText =
+    "\uD83D\uDED2 YANGI BUYURTMA — iStore.uz\n" +
+    "\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n" +
+    "\uD83D\uDC64 Mijoz: " + fullName + "\n" +
+    "\uD83D\uDCDE Telefon: " + phone + birthLine + "\n" +
+    "\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n" +
+    "\uD83D\uDCE6 Mahsulotlar:\n" + lines.join('\n') + "\n" +
+    "\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n" +
+    "\uD83D\uDCB3 To'lov: " + payLabel + "\n" +
+    "\uD83D\uDD50 Vaqt: " + dateStr + "\n" +
+    "\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501";
+
+  // ── 3. Yuborish (3 marta retry, plain-text fallback) ──
+  async function sendMsg(chatId, text, plain) {
+    const body = plain
+      ? { chat_id: chatId, text }
+      : { chat_id: chatId, text, parse_mode: 'HTML' };
+    const r = await fetch(API + '/sendMessage', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    return r.json();
+  }
+
+  async function sendWithRetry(chatId, text) {
+    // birinchi HTML parse_mode bilan, xato bo'lsa plain text
+    let d = await sendMsg(chatId, text, false);
+    if (d.ok) return d;
+    d = await sendMsg(chatId, text, true);
+    return d;
+  }
+
+  // ── 4. Asosiy oqim ──
+  try {
+    const chatId = await resolveChatId();
+
+    if (!chatId) {
+      btn.disabled = false;
+      btn.textContent = '✅ Buyurtma berish';
+      showToast("⚠️ Avval botga /start yuboring, keyin qayta urinib ko'ring!");
+      return;
+    }
+
+    const result = await sendWithRetry(chatId, msgText);
+    if (result.ok) {
+      showToast("🎉 Buyurtmangiz qabul qilindi! Operator tez orada bog'lanadi.");
+      document.getElementById('order-form').reset();
+      selectPay('naqd');
+      cart = [];
+      renderCart();
+      updateCartBar();
+      updateCalculations();
+    } else {
+      console.error('Telegram error:', result);
+      showToast("❌ Telegram xatosi: " + (result.description || 'Noma\'lum'));
+    }
+  } catch (err) {
+    console.error('Network error:', err);
+    showToast("❌ Tarmoq xatosi. Internet aloqasini tekshiring.");
+  }
+
+  btn.disabled = false;
+  btn.textContent = '✅ Buyurtma berish';
+}
+
+function filterTab(btn, cat) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.product-card').forEach(card => {
+    card.classList.toggle('hidden', cat !== 'all' && card.dataset.cat !== cat);
+  });
+}
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 4000);
+}
+
+window.onload = () => { init(); renderCart(); };
+</script>
+</body>
+</html>
