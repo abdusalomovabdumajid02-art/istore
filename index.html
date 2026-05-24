@@ -927,6 +927,30 @@ function updateCalculations() {
   }
 }
 
+// ===== SUPABASE CONFIG =====
+const SUPABASE_URL = 'https://zqwukzqaqorcdmpqvnyf.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_6C-VYIoJ6NUBIADjnQgVyQ_-26Yguu_';
+
+async function saveToSupabase(orderData) {
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/orders', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify(orderData)
+    });
+    const data = await res.json();
+    return res.ok ? data : null;
+  } catch (e) {
+    console.error('Supabase error:', e);
+    return null;
+  }
+}
+
 async function handleOrderSubmit(event) {
   event.preventDefault();
   const pId = document.getElementById('product-select').value;
@@ -950,54 +974,36 @@ async function handleOrderSubmit(event) {
   btn.disabled = true;
   btn.textContent = '⏳ Yuborilmoqda...';
 
-  const orderPayload = {
-    productId: product.id,
-    productName: product.name,
-    quantity: qty,
-    paymentMethod: selectedPaymentMethod,
-    customerName: fullName,
-    customerPhone: phone,
-    timestamp: new Date().toISOString()
-  };
-
   const TOKEN = '8664546966:AAHhFlxpoMFLKu0mGEmcl-BD29jGQDR0cyw';
   const API  = 'https://api.telegram.org/bot' + TOKEN;
 
-  // ── 1. Chat ID ni getUpdates orqali avtomatik topish ──
-  async function resolveChatId() {
-    if (window.__tgChatId) return window.__tgChatId;
-    const r   = await fetch(API + '/getUpdates?limit=20&timeout=0');
-    const d   = await r.json();
-    if (!d.ok || !d.result.length) return null;
-    for (const u of [...d.result].reverse()) {
-      const chat = (u.message || u.channel_post || {}).chat;
-      if (chat && chat.id) { window.__tgChatId = chat.id; return chat.id; }
-    }
-    return null;
-  }
-
-  // ── 2. Xabar matni ──
   const totalSum = cart.length > 0 ? cartTotal() : product.price * qty;
+  const finalTotal = selectedPaymentMethod === 'kredit' ? Math.round(totalSum * 1.15) : totalSum;
 
+  // Mahsulotlar ro'yxati (savat yoki yakka)
+  let productName = '';
   let lines = [];
   if (cart.length > 0) {
     cart.forEach(c => {
       const p = products.find(x => x.id === c.id);
-      lines.push('  • ' + (p ? p.name : c.id) + ' x' + c.qty + ' = ' + (p ? p.price * c.qty : 0).toLocaleString('uz-UZ') + ' UZS');
+      if (p) {
+        lines.push('  • ' + p.name + ' x' + c.qty + ' = ' + (p.price * c.qty).toLocaleString('uz-UZ') + ' UZS');
+        productName += p.name + ' x' + c.qty + '; ';
+      }
     });
   } else {
     lines.push('  • ' + product.name + ' x' + qty + ' = ' + (product.price * qty).toLocaleString('uz-UZ') + ' UZS');
+    productName = product.name;
   }
 
-  const payLabel = selectedPaymentMethod === 'kredit'
-    ? "Muddatli (6 oy +15%) = " + Math.round(totalSum * 1.15).toLocaleString('uz-UZ') + " UZS"
-    : "Naqd = " + totalSum.toLocaleString('uz-UZ') + " UZS";
-
-  const birthVal  = document.getElementById('f-birth').value;
+  const birthVal = document.getElementById('f-birth').value;
   const birthLine = birthVal ? "\nTug'ilgan sana: " + birthVal : '';
-  const now       = new Date();
-  const pad       = n => String(n).padStart(2,'0');
-  const dateStr   = pad(now.getDate())+'.'+pad(now.getMonth()+1)+'.'+now.getFullYear()+' '+pad(now.getHours())+':'+pad(now.getMinutes());
+  const now = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  const dateStr = pad(now.getDate())+'.'+pad(now.getMonth()+1)+'.'+now.getFullYear()+' '+pad(now.getHours())+':'+pad(now.getMinutes());
+  const payLabel = selectedPaymentMethod === 'kredit'
+    ? "Muddatli (6 oy +15%) = " + finalTotal.toLocaleString('uz-UZ') + " UZS"
+    : "Naqd = " + totalSum.toLocaleString('uz-UZ') + " UZS";
 
   const msgText =
     "\uD83D\uDED2 YANGI BUYURTMA — iStore.uz\n" +
@@ -1011,7 +1017,32 @@ async function handleOrderSubmit(event) {
     "\uD83D\uDD50 Vaqt: " + dateStr + "\n" +
     "\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501";
 
-  // ── 3. Yuborish (3 marta retry, plain-text fallback) ──
+  // ── 1. Supabase ga saqlash ──
+  const supabaseData = {
+    customer_name: fullName,
+    customer_phone: phone,
+    product_name: productName.trim(),
+    quantity: cart.length > 0 ? cart.reduce((s,c) => s + c.qty, 0) : qty,
+    payment_method: selectedPaymentMethod,
+    total_sum: finalTotal,
+    birth_date: birthVal || null,
+    status: 'yangi'
+  };
+  await saveToSupabase(supabaseData);
+
+  // ── 2. Telegram ga yuborish ──
+  async function resolveChatId() {
+    if (window.__tgChatId) return window.__tgChatId;
+    const r = await fetch(API + '/getUpdates?limit=20&timeout=0');
+    const d = await r.json();
+    if (!d.ok || !d.result.length) return null;
+    for (const u of [...d.result].reverse()) {
+      const chat = (u.message || u.channel_post || {}).chat;
+      if (chat && chat.id) { window.__tgChatId = chat.id; return chat.id; }
+    }
+    return null;
+  }
+
   async function sendMsg(chatId, text, plain) {
     const body = plain
       ? { chat_id: chatId, text }
@@ -1025,39 +1056,24 @@ async function handleOrderSubmit(event) {
   }
 
   async function sendWithRetry(chatId, text) {
-    // birinchi HTML parse_mode bilan, xato bo'lsa plain text
     let d = await sendMsg(chatId, text, false);
     if (d.ok) return d;
-    d = await sendMsg(chatId, text, true);
-    return d;
+    return sendMsg(chatId, text, true);
   }
 
-  // ── 4. Asosiy oqim ──
   try {
     const chatId = await resolveChatId();
+    if (chatId) await sendWithRetry(chatId, msgText);
 
-    if (!chatId) {
-      btn.disabled = false;
-      btn.textContent = '✅ Buyurtma berish';
-      showToast("⚠️ Avval botga /start yuboring, keyin qayta urinib ko'ring!");
-      return;
-    }
-
-    const result = await sendWithRetry(chatId, msgText);
-    if (result.ok) {
-      showToast("🎉 Buyurtmangiz qabul qilindi! Operator tez orada bog'lanadi.");
-      document.getElementById('order-form').reset();
-      selectPay('naqd');
-      cart = [];
-      renderCart();
-      updateCartBar();
-      updateCalculations();
-    } else {
-      console.error('Telegram error:', result);
-      showToast("❌ Telegram xatosi: " + (result.description || 'Noma\'lum'));
-    }
+    showToast("🎉 Buyurtmangiz qabul qilindi! Operator tez orada bog'lanadi.");
+    document.getElementById('order-form').reset();
+    selectPay('naqd');
+    cart = [];
+    renderCart();
+    updateCartBar();
+    updateCalculations();
   } catch (err) {
-    console.error('Network error:', err);
+    console.error('Error:', err);
     showToast("❌ Tarmoq xatosi. Internet aloqasini tekshiring.");
   }
 
